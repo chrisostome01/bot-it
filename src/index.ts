@@ -16,22 +16,13 @@ const bot = new Telegraf(process.env.BOT_TOKEN || "");
 const apiId = Number(process.env.APP_ID);
 const apiHash = process.env.APP_HASH || "";
 const stringSession = new StringSession(process.env.AUTH_KEY);
+const client = new TelegramClient(stringSession, apiId, apiHash, {
+  connectionRetries: 5,
+});
 
 bot.command("sum", async (ctx) => {
   if (ctx.command === "sum") {
     const channel = ctx.payload;
-    const client = new TelegramClient(stringSession, apiId, apiHash, {
-      connectionRetries: 5,
-    });
-    await client.start({
-      phoneNumber: async () => await input.text("Please enter your number: "),
-      password: async () => await input.text("Please enter your password: "),
-      phoneCode: async () =>
-        await input.text("Please enter the code you received: "),
-      onError: (err) => console.log(err),
-    });
-
-    client.session.save();
 
     ctx.sendChatAction("upload_voice");
     const result = client.iterMessages(channel, { limit: 100, reverse: true });
@@ -58,6 +49,19 @@ process.once("SIGINT", () => {
 });
 
 process.once("SIGTERM", () => {});
+
+(async () => {
+
+  await client.start({
+    phoneNumber: async () => await input.text("Please enter your number: "),
+    password: async () => await input.text("Please enter your password: "),
+    phoneCode: async () =>
+      await input.text("Please enter the code you received: "),
+    onError: (err) => console.log(err),
+  });
+
+  client.session.save();
+})()
 
 bot
   .launch()
