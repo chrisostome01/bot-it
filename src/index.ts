@@ -29,6 +29,7 @@ bot.command("sum", async (ctx) => {
 
     const allMeassages: string[] = [];
     for await (const message of result) {
+      console.log(message)
       allMeassages.push(message.text);
     }
 
